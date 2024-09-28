@@ -94,9 +94,8 @@ The application is developed using Streamlit, allowing users to interactively up
 
 - Visual Output:
   
-  ![image](https://github.com/user-attachments/assets/7032789f-6083-481b-81a9-06631bfc6d6c)
+  ![image](https://github.com/mystdream/abhay-sharma-wasserstoff-AiInternTask/blob/49b022796ad18d38b4b43f9a8c0b0052f346331a/data/output/segment%201.png)
 
-  
 
 Detected objects with confidence scores:
 
@@ -104,24 +103,11 @@ Object 1: Confidence 1.00
 
 Object 2: Confidence 1.00
 
-Object 3: Confidence 1.00
+Object 3: Confidence 0.99
 
-Object 4: Confidence 1.00
+Object 4: Confidence 0.99
 
-Object 5: Confidence 1.00
-
-Object 6: Confidence 0.99
-
-Object 7: Confidence 0.98
-
-Object 8: Confidence 0.97
-
-Object 9: Confidence 0.90
-
-Object 10: Confidence 0.59
-
-Object 11: Confidence 0.55
-
+Object 5: Confidence 0.97
 
 
 ## Conclusion
