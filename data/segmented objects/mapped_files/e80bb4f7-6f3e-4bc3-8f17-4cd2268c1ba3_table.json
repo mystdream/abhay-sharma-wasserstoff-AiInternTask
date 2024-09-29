@@ -1,0 +1,32 @@
+[
+  {
+    "Object ID": "b9f5e792-17d1-4456-a54d-ac046492db41",
+    "Class": "person",
+    "Confidence": "1.00",
+    "Extracted Text": ""
+  },
+  {
+    "Object ID": "ad3b5062-f10d-4960-b06b-776e719c51be",
+    "Class": "person",
+    "Confidence": "0.99",
+    "Extracted Text": ""
+  },
+  {
+    "Object ID": "9bb1f97f-fed4-4e2d-9366-a5810c8f277d",
+    "Class": "person",
+    "Confidence": "0.99",
+    "Extracted Text": ""
+  },
+  {
+    "Object ID": "dd5bc22a-f351-4a64-9949-2b999f3c4fa9",
+    "Class": "bottle",
+    "Confidence": "0.97",
+    "Extracted Text": ""
+  },
+  {
+    "Object ID": "bd60198b-ae1c-422e-8c56-0195039d3c7a",
+    "Class": "bottle",
+    "Confidence": "0.95",
+    "Extracted Text": ""
+  }
+]
