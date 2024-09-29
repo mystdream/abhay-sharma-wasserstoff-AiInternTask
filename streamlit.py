@@ -1,15 +1,24 @@
 import streamlit as st
 import os
-import json
 from PIL import Image
-from pipeline_module import EnhancedMaskRCNNPipeline
+from models.segmentation_model import SegmentationModel
+from models.text_extraction_model import TextExtractor
+from models.summarization_model import Summarizer
+from utils.preprocessing import preprocess_image
+from utils.visualization import visualize_results
+from utils.postprocessing import rle_encode, rle_decode
 
 # Initialize the pipeline
 @st.cache_resource
 def load_pipeline():
     config_file = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
     weights_file = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
-    return EnhancedMaskRCNNPipeline(config_file, weights_file)
+    
+    segmentation_model = SegmentationModel(config_file, weights_file)
+    text_extractor = TextExtractor()
+    summarizer = Summarizer()
+    
+    return segmentation_model, text_extractor, summarizer
 
 # Streamlit app
 def run_streamlit_app():
@@ -17,7 +26,7 @@ def run_streamlit_app():
     st.write("Upload an image to segment objects, extract text, and analyze!")
 
     # Load the pipeline
-    pipeline = load_pipeline()
+    segmentation_model, text_extractor, summarizer = load_pipeline()
 
     # Output directory
     base_output_dir = "data"
@@ -42,35 +51,39 @@ def run_streamlit_app():
             with open(image_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            # Process the image
+            # Preprocess the image
+            image = preprocess_image(image_path)
+
+            # Perform object detection
             with st.spinner("Processing image..."):
-                result = pipeline.process_image(image_path, base_output_dir)
+                outputs = segmentation_model.perform_inference(image)
+                results = segmentation_model.postprocess_results(outputs, image)
+
+            # Extract text and summarize the whole image
+            full_image_text = text_extractor.extract_text(image_path)
+            object_info = [f"{result['class']} (confidence: {result['score']:.2f})" for result in results]
+            object_summary = ", ".join(object_info)
+            summary_input = f"The image contains the following objects: {object_summary}. The following text was extracted from the image: '{full_image_text}'. Provide a brief summary."
+            image_summary = summarizer.summarize(summary_input)
 
             # Display the segmented image
             st.subheader("Segmented Image")
-            segmented_image_path = os.path.join(output_visualizations_dir, f"{result['master_id']}_visualized.jpg")
+            master_id = str(uuid.uuid4())
+            visualize_results(image, results, segmentation_model.class_names, MetadataCatalog.get(segmentation_model.cfg.DATASETS.TRAIN[0]), output_visualizations_dir, master_id)
+            segmented_image_path = os.path.join(output_visualizations_dir, f"{master_id}_visualized.jpg")
             st.image(segmented_image_path, use_column_width=True)
 
             # Display whole image summary
             st.subheader("Whole Image Summary")
-            st.write(result['whole_image_summary'])
+            st.write(image_summary)
 
             # Display extracted text for the whole image
             st.subheader("Extracted Text")
-            if result['objects']:
-                object_text_path = os.path.join(output_texts_dir, f"{result['objects'][0]['object_id']}_text.txt")
-                with open(object_text_path, 'r') as f:
-                    extracted_text = f.read().strip()
-                    if extracted_text:
-                        st.write(extracted_text)
-                    else:
-                        st.write("No text was extracted from the image.")
-            else:
-                st.write("No objects detected in the image.")
+            st.write(full_image_text if full_image_text else "No text was extracted from the image.")
 
             # Display object analysis results
             st.subheader("Object Analysis")
-            for obj in result['objects']:
+            for obj in results:
                 with st.expander(f"{obj['class']} (Confidence: {obj['score']:.2f})"):
                     st.image(obj['object_path'], use_column_width=True)
 
