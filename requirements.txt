@@ -1,12 +1,11 @@
 streamlit
-torch
+torch==1.13.0
+torchvision==0.14.0
 opencv-python
 Pillow
 matplotlib
 tqdm
-uuid
 pytesseract
 transformers
-torchvision
 numpy
 detectron2@git+https://github.com/facebookresearch/detectron2.git
