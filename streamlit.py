@@ -19,33 +19,36 @@ def run_streamlit_app():
     # Load the pipeline
     pipeline = load_pipeline()
 
-    # Output directory selection
-    output_dir = st.text_input("Output Directory", "output")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        st.success(f"Created output directory: {output_dir}")
+    # Output directory
+    base_output_dir = "data"
+    input_images_dir = os.path.join(base_output_dir, "input_images")
+    segmented_objects_dir = os.path.join(base_output_dir, "segmented_objects", "segmented_objects")
+    mapped_files_dir = os.path.join(base_output_dir, "segmented_objects", "mapped_files")
+    output_visualizations_dir = os.path.join(base_output_dir, "output", "visualizations")
+    output_summaries_dir = os.path.join(base_output_dir, "output", "summaries")
+    output_texts_dir = os.path.join(base_output_dir, "output", "extracted_texts")
+
+    # Create directories if they don't exist (before file uploading and processing)
+    for directory in [input_images_dir, segmented_objects_dir, mapped_files_dir, output_visualizations_dir, output_summaries_dir, output_texts_dir]:
+        os.makedirs(directory, exist_ok=True)
 
     # File uploader
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
         try:
-            # Create a temporary directory to store the uploaded image
-            temp_dir = "temp_streamlit_upload"
-            os.makedirs(temp_dir, exist_ok=True)
-
-            # Save the uploaded image
-            image_path = os.path.join(temp_dir, uploaded_file.name)
+            # Save the uploaded image to 'input_images' folder within the output directory
+            image_path = os.path.join(input_images_dir, uploaded_file.name)
             with open(image_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
             # Process the image
             with st.spinner("Processing image..."):
-                result = pipeline.process_image(image_path, output_dir)
+                result = pipeline.process_image(image_path, base_output_dir)
 
-            # Display the original image with segmentation
+            # Display the segmented image
             st.subheader("Segmented Image")
-            segmented_image_path = os.path.join(output_dir, "visualizations", f"{result['master_id']}_visualized.jpg")
+            segmented_image_path = os.path.join(output_visualizations_dir, f"{result['master_id']}_visualized.jpg")
             st.image(segmented_image_path, use_column_width=True)
 
             # Display whole image summary
@@ -55,8 +58,8 @@ def run_streamlit_app():
             # Display extracted text for the whole image
             st.subheader("Extracted Text")
             if result['objects']:
-                text_path = os.path.join(output_dir, "extracted_text", f"{result['objects'][0]['object_id']}_text.txt")
-                with open(text_path, 'r') as f:
+                object_text_path = os.path.join(output_texts_dir, f"{result['objects'][0]['object_id']}_text.txt")
+                with open(object_text_path, 'r') as f:
                     extracted_text = f.read().strip()
                     if extracted_text:
                         st.write(extracted_text)
@@ -73,17 +76,14 @@ def run_streamlit_app():
 
             # Display links to output folders
             st.subheader("Output Folders")
-            st.write(f"- Segmented Objects: {os.path.abspath(os.path.join(output_dir, 'segmented_objects'))}")
-            st.write(f"- Extracted Text: {os.path.abspath(os.path.join(output_dir, 'extracted_text'))}")
-            st.write(f"- Summaries: {os.path.abspath(os.path.join(output_dir, 'summaries'))}")
-            st.write(f"- Visualizations: {os.path.abspath(os.path.join(output_dir, 'visualizations'))}")
-            st.write(f"- Data: {os.path.abspath(os.path.join(output_dir, 'data'))}")
+            st.write(f"- Input Images: {os.path.abspath(input_images_dir)}")
+            st.write(f"- Segmented Objects: {os.path.abspath(segmented_objects_dir)}")
+            st.write(f"- Mapped Files: {os.path.abspath(mapped_files_dir)}")
+            st.write(f"- Output (Visualizations): {os.path.abspath(output_visualizations_dir)}")
+            st.write(f"- Output (Summaries): {os.path.abspath(output_summaries_dir)}")
+            st.write(f"- Output (Extracted Texts): {os.path.abspath(output_texts_dir)}")
 
-            # Cleanup temporary upload directory
-            for file in os.listdir(temp_dir):
-                os.remove(os.path.join(temp_dir, file))
-            os.rmdir(temp_dir)
-            st.success(f"Processing complete! Results saved in: {output_dir}")
+            st.success(f"Processing complete! Results saved in: {base_output_dir}")
         except Exception as e:
             st.error(f"An error occurred during processing: {str(e)}")
     else:
