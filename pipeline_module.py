@@ -25,7 +25,7 @@ class EnhancedMaskRCNNPipeline:
         self.cfg.merge_from_file(model_zoo.get_config_file(config_file))
         self.cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(weights_file)
         self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = confidence_threshold
-        self.cfg.MODEL.DEVICE = "cpu"
+        self.cfg.MODEL.DEVICE = "cuda"
         self.predictor = DefaultPredictor(self.cfg)
         self.class_names = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]).thing_classes
 
