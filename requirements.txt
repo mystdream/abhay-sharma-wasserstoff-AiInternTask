@@ -1,6 +1,5 @@
 streamlit
 torch
-detectron2@git+https://github.com/facebookresearch/detectron2.git
 opencv-python
 Pillow
 matplotlib
@@ -10,3 +9,4 @@ pytesseract
 transformers
 torchvision
 numpy
+detectron2@git+https://github.com/facebookresearch/detectron2.git
