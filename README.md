@@ -108,7 +108,3 @@ The application is developed using Streamlit, allowing users to interactively up
   ![image](streamlit_ui/Object_Analysis.jpg)
 
   ![image](streamlit_ui/output_folder.jpg)
-
-## Conclusion
-
-This project demonstrates how to build an end-to-end AI pipeline for image segmentation and object analysis, utilizing a range of deep learning and image processing techniques. The final output provides a comprehensive analysis of objects within an image, complete with mapped data and visual representations.
