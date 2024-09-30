@@ -1,93 +1,98 @@
 # AI Pipeline for Image Segmentation and Object Analysis
 
-## Project Overview
+## Overview
+This project is an **AI-driven image segmentation and analysis pipeline** built using `Detectron2`, `pytesseract`, and `transformers`. The goal is to segment objects in an image, extract text, and generate a summary. The pipeline is integrated with a **Streamlit UI** to allow users to upload images and visualize the results interactively.
 
-This project involves building an AI pipeline to process input images, segment, identify, and analyze objects within them. The pipeline is designed to output a summary table with mapped data for each object. The entire process is divided into several steps, each focusing on a specific aspect of image analysis.
+## Features
+1. **Object Segmentation:** Uses Mask R-CNN to detect and segment objects in the image.
+2. **Text Extraction:** Extracts textual content from the image using OCR (`pytesseract`).
+3. **Image Summarization:** Uses a summarization model (`BART-large`) to generate a brief summary based on detected objects and extracted text.
+4. **Streamlit UI:** A user-friendly interface to upload images, view segmented objects, extracted text, and summaries.
 
-## Objectives
+## Installation
 
-- Segment objects within an input image.
-- Extract and store each segmented object separately with unique identifiers.
-- Identify and describe each object.
-- Extract text or data from each object.
-- Summarize the nature and attributes of each object.
-- Map all extracted data and attributes to each object.
-- Generate a final output with the original image and a table summarizing all the data.
+### Requirements
+- Python 3.8+
+- Required Libraries:
+  ```bash
+  pip install torch torchvision detectron2 pytesseract transformers tqdm opencv-python-headless Pillow streamlit
+  ```
 
-## Steps and Deliverables
+### Clone the repository
+```bash
+git clone https://github.com/your-repo/image-segmentation-pipeline.git
+cd image-segmentation-pipeline
+```
 
-### Step 1: Image Segmentation
-- **Task:** Segment all objects within an input image.
-- **Deliverables:**
-  - Code to implement or use a pre-trained model (e.g., Mask R-CNN, DETR) for image segmentation.
-  - Visual output showing segmented objects within the image.
-- **Suggested Tools/Resources:** PyTorch, TensorFlow, pre-trained segmentation models.
+### Setting up Tesseract OCR
+Install Tesseract on your system:
+- **Windows:** Download and install from [Tesseract GitHub](https://github.com/tesseract-ocr/tesseract).
+- **Linux:** Install via package manager:
+  ```bash
+  sudo apt install tesseract-ocr
+  ```
 
-### Step 2: Object Extraction and Storage
-- **Task:** Extract each segmented object from the image and store separately with unique IDs.
-- **Deliverables:**
-  - Code to extract and save each segmented object as a separate image.
-  - Metadata including unique ID for each object and a master ID for the original image.
-  - Storage of object images and metadata in a file system or database.
-- **Suggested Tools/Resources:** OpenCV, PIL, SQLite, or any preferred database.
+Make sure `pytesseract.pytesseract.tesseract_cmd` points to the correct installation path.
 
-### Step 3: Object Identification
-- **Task:** Identify each object and describe what they are in the real world.
-- **Deliverables:**
-  - Code to implement or use a pre-trained model (e.g., YOLO, Faster R-CNN, CLIP) for object identification and description.
-  - Document containing identified objects and their descriptions.
-- **Suggested Tools/Resources:** Pre-trained object detection models, CLIP.
+## How to Run
 
-### Step 4: Text/Data Extraction from Objects
-- **Task:** Extract text or data from each object image.
-- **Deliverables:**
-  - Code to implement or use a pre-trained model (e.g., Tesseract OCR, EasyOCR) for text extraction.
-  - Document containing extracted text/data for each object.
-- **Suggested Tools/Resources:** OCR tools, PyTorch, TensorFlow.
+### Step 1: Run the Streamlit App
+```bash
+streamlit run app.py
+```
 
-### Step 5: Summarize Object Attributes
-- **Task:** Summarize the nature and attributes of each object.
-- **Deliverables:**
-  - Code to generate a summary of the nature and attributes of each object.
-  - Document containing summarized attributes for each object.
-- **Suggested Tools/Resources:** NLP models, summarization algorithms.
+### Step 2: Upload an Image
+In the Streamlit UI:
+1. Upload an image in `.jpg`, `.jpeg`, or `.png` format.
+2. The app will process the image, segment objects, extract text, and display the results.
 
-### Step 6: Data Mapping
-- **Task:** Map all extracted data and attributes to each object and the master input image.
-- **Deliverables:**
-  - Code to map unique IDs, descriptions, extracted text/data, and summaries to each object.
-  - Data structure (e.g., JSON, database schema) representing the mapping.
-- **Suggested Tools/Resources:** JSON, SQL, any preferred database.
+### Outputs
+After processing the image, the following outputs are generated:
+1. **Segmented Image**: A visual representation with objects detected.
+2. **Whole Image Summary**: A summary describing objects and extracted text.
+3. **Extracted Text**: The text detected within the image (if any).
+4. **Individual Object Images**: Each detected object is saved as a separate image.
+5. **Mapped Data (JSON)**: A JSON file mapping object data (classes, bounding boxes, confidence scores) and other relevant metadata.
 
-### Step 7: Output Generation
-- **Task:** Output the original image along with a table containing all mapped data for each object in the master image.
-- **Deliverables:**
-  - Code to generate the final output image with annotations.
-  - Table summarizing all data mapped to each object and the master image.
-  - Final visual output showing the original image with segmented objects and an accompanying table.
+The results are saved in the following folder structure:
+```bash
+data/
+│
+├── input_images/            # Uploaded images
+├── segmented_objects/       # Segmented object images and metadata
+│   ├── segmented_objects/   # Cropped object images
+│   └── mapped_files/        # JSON mappings
+├── output/
+│   ├── visualizations/      # Segmented visualizations
+│   ├── summaries/           # Summarized text
+│   └── extracted_texts/     # Extracted text files
+```
 
-## Setup Instructions
+## Key Functions in the Pipeline
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-repo/ai-pipeline-image-segmentation.git
-   cd ai-pipeline-image-segmentation
-   ```
+### `preprocess_image(image_path)`
+- Loads and preprocesses the image for inference.
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### `perform_inference(image)`
+- Performs object detection using Mask R-CNN.
 
-3. **Run the pipeline:**
-   ```bash
-   python run_pipeline.py --input_image path/to/image.jpg
-   ```
+### `extract_objects(image, results, segmented_objects_dir)`
+- Extracts segmented objects and saves them as separate images.
 
-4. **Output:**
-   - The segmented objects will be saved in the `output/` directory.
-   - Metadata, summaries, and the final output table will be generated and saved in the `output/` directory.
-  
+### `extract_text(image_path)`
+- Extracts text using `pytesseract`.
+
+### `summarize_image(results, full_image_text)`
+- Generates a summary of the detected objects and extracted text using a summarization model.
+
+### `process_image(image_path, base_output_dir)`
+- Processes an image, performs segmentation, text extraction, and saves outputs.
+
+## Troubleshooting
+- If there are issues with missing libraries, ensure all dependencies listed in the requirements are installed.
+- If `pytesseract` cannot find Tesseract, check the `tesseract_cmd` configuration in your environment.
+
+
 ## Streamlit Application
 The application is developed using Streamlit, allowing users to interactively upload images, view segmented objects, and see the confidence scores for object detection. The application outputs the original image with segmentation overlays and a list of detected objects with confidence scores.
 
