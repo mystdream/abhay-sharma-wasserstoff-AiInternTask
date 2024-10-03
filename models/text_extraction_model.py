@@ -1,13 +1,11 @@
 import cv2
-from PIL import Image
-import pytesseract
+import easyocr
 
 class TextExtractionModel:
-    @staticmethod
-    def extract_text(image_path):
+    def __init__(self)
+        self.reader = easyocr.Reader(['en'])
+    def extract_text(self, image_path):
         image = cv2.imread(image_path)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        pil_image = Image.fromarray(image_rgb)
-        text = pytesseract.image_to_string(pil_image)
-        text = ''.join(char for char in text if char.isprintable())
-        return text.strip()
+        results = self.reader.readtext(image)
+        extracted_text = ' '.join([result[1] for result in results])
+        return ''.join(char for char in extracted_text if char.isprintable()).strip()
