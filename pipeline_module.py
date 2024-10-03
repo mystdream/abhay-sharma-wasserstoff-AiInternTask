@@ -1,3 +1,4 @@
+%%writefile pipeline_module.py
 import torch
 import detectron2
 from detectron2.utils.logger import setup_logger
@@ -15,7 +16,7 @@ from PIL import Image
 import os
 import json
 import uuid
-import pytesseract
+import easyocr 
 from transformers import pipeline
 from tqdm import tqdm
 
@@ -29,8 +30,8 @@ class EnhancedMaskRCNNPipeline:
         self.predictor = DefaultPredictor(self.cfg)
         self.class_names = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]).thing_classes
 
-        # Initialize text extraction and summarization models
-        self.text_extractor = pytesseract.pytesseract
+        # Initialize EasyOCR for text extraction and summarization model
+        self.text_extractor = easyocr.Reader(['en']) 
         self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
     def preprocess_image(self, image_path):
@@ -94,9 +95,8 @@ class EnhancedMaskRCNNPipeline:
     def extract_text(self, image_path):
         image = cv2.imread(image_path)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        pil_image = Image.fromarray(image_rgb)
-        text = self.text_extractor.image_to_string(pil_image)
-        text = ''.join(char for char in text if char.isprintable())
+        text_results = self.text_extractor.readtext(image_rgb, detail=0)  # Get only the text
+        text = ' '.join(text_results)  # Join detected text into a single string
         return text.strip()
 
     def summarize_image(self, results, full_image_text):
@@ -194,10 +194,10 @@ class EnhancedMaskRCNNPipeline:
 if __name__ == "__main__":
     config_file = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
     weights_file = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
-    
-    pipeline = EnhancedMaskRCNNPipeline(config_file, weights_file)
-    
-    input_images_dir = "data/input_images"
-    output_dir = "data"
 
-    results = pipeline.process_directory(input_images_dir, output_dir)
+    pipeline = EnhancedMaskRCNNPipeline(config_file, weights_file)
+
+    input_images_dir = "data/input_images"
+    base_output_dir = "data"
+
+    results = pipeline.process_directory(input_images_dir, base_output_dir)
