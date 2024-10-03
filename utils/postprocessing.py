@@ -1,18 +1,16 @@
-import numpy as np
+import os
+import uuid
+import cv2
 
-def rle_encode(mask):
-    pixels = mask.flatten()
-    pixels = np.concatenate([[0], pixels, [0]])
-    runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
-    runs[1::2] -= runs[::2]
-    return ' '.join(str(x) for x in runs)
+from .data_mapping import rle_decode
 
-def rle_decode(rle, shape):
-    s = rle.split()
-    starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
-    starts -= 1
-    ends = starts + lengths
-    img = np.zeros(shape[0] * shape[1], dtype=np.uint8)
-    for lo, hi in zip(starts, ends):
-        img[lo:hi] = 1
-    return img.reshape(shape)
+def extract_objects(image, results, segmented_objects_dir):
+    for i, result in enumerate(results):
+        mask = rle_decode(result['segmentation'], image.shape[:2])
+        object_image = image * mask[:, :, np.newaxis]
+        object_image[mask == 0] = [255, 255, 255]  # Set background to white
+        object_id = str(uuid.uuid4())
+        result['object_id'] = object_id
+        object_path = os.path.join(segmented_objects_dir, f"{object_id}.png")
+        cv2.imwrite(object_path, object_image[:, :, ::-1])
+        result['object_path'] = object_path
