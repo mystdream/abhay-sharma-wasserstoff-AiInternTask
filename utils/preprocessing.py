@@ -1,4 +1,3 @@
-# utils/preprocessing.py
 import cv2
 
 def preprocess_image(image_path):
