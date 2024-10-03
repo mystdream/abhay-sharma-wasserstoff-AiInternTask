@@ -1,3 +1,4 @@
+%%writefile app.py
 import streamlit as st
 import os
 import json
