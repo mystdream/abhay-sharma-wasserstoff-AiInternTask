@@ -1,6 +1,5 @@
 import cv2
 import easyocr
-
 class TextExtractionModel:
     def __init__(self)
         self.reader = easyocr.Reader(['en'])
