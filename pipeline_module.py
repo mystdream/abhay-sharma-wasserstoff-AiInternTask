@@ -1,4 +1,3 @@
-%%writefile pipeline_module.py
 import torch
 import detectron2
 from detectron2.utils.logger import setup_logger
